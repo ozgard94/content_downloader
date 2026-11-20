@@ -1,0 +1,28 @@
+server {
+    listen 10000; # Render автоматически передаёт PORT=10000
+
+    location / {
+        auth_basic "Restricted Area";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+
+        # Указываем адрес вашего PlaylistDL
+        proxy_pass https://playlistdl-loea.onrender.com;
+
+        # --- Ключевые настройки для HTTPS-проксирования на Render ---
+        proxy_ssl_server_name on;
+        proxy_ssl_name "playlistdl-loea.onrender.com";
+        proxy_set_header Host "playlistdl-loea.onrender.com";
+        # -----------------------------------------------------------
+
+        # --- Увеличенные таймауты, чтобы дождаться пробуждения сервиса ---
+        proxy_connect_timeout 120s;
+        proxy_send_timeout 120s;
+        proxy_read_timeout 120s;
+        # -----------------------------------------------------------------
+
+        # Стандартные заголовки для корректной работы
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
